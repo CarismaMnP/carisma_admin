@@ -11,7 +11,7 @@ import { FC, useState } from 'react';
 import { ActionsCard } from '@/shared';
 import { API } from '@/api';
 import { IArrival } from '../types';
-import { ArrivalForm } from './arrivalForm';
+import { ArrivalForm } from './ArrivalForm';
 
 interface ICategoryCardProps {
   arrival: IArrival;

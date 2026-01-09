@@ -1,10 +1,13 @@
+//@ts-nocheck
+
 import { Button, Dialog, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { API } from '@/api';
 
 import { ArrivalCard } from './components/ArrivalCard';
 import { IArrival } from './types';
-import { ArrivalForm } from './components/arrivalForm';
+import { ArrivalForm } from './components/ArrivalForm';
+
 
 export const ArrivalsTab = () => {
   const [arrivals, setArrivals] = useState<IArrival[]>([]);

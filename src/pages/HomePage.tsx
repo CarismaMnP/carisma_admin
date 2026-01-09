@@ -1,4 +1,4 @@
-import { Box, Chip, Container, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Container, Paper, Stack, Tab, Tabs } from '@mui/material';
 import { SyntheticEvent, useEffect, useState } from 'react';
 import { useLocation, useNavigate, Routes, Route, Navigate } from 'react-router-dom';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
