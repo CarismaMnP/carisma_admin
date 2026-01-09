@@ -1,0 +1,35 @@
+name: Deploy Carisma Admin App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: admin-runner
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create .env.production
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_API_URL_S3: ${{ secrets.VITE_API_URL_S3 }}
+        run: |
+          cat <<EOF > .env
+          VITE_API_URL=$VITE_API_URL
+          VITE_API_URL_S3=$VITE_API_URL_S3
+          
+          EOF
+        shell: bash
+
+      - name: Install dependencies
+        run: npm install --force
+
+      - name: Build React
+        run: npm run build
+
+      - name: Move to /var/www
+        run: sudo rm -rf /var/www/admin && sudo rsync -av --delete dist/ /var/www/admin
