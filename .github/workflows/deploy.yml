@@ -32,4 +32,4 @@ jobs:
         run: npm run build
 
       - name: Move to /var/www
-        run: sudo rm -rf /var/www/admin && sudo rsync -av --delete dist/ /var/www/admin
+        run: rm -rf /var/www/admin && rsync -av --delete dist/ /var/www/admin
