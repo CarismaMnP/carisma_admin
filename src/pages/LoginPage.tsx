@@ -38,18 +38,15 @@ export const LoginPage = () => {
         sx={{
           width: '100%',
           maxWidth: 420,
-          p: { xs: 3, md: 4 },
-          borderRadius: 20,
+          p: { xs: 4, md: 4 },
+          // borderRadius: 20,
           background: 'linear-gradient(145deg, #ffffff 0%, #f5f7fb 100%)',
         }}
       >
         <Stack gap='18px' alignItems='center'>
-          <Box component='img' src={'/faunologo.svg'} alt='FAUNO' sx={{ height: 56 }} />
+          {/* <Box component='img' src={'/faunologo.svg'} alt='FAUNO' sx={{ height: 56 }} /> */}
           <Stack gap={0.5} textAlign='center'>
             <Typography variant='h6'>Добро пожаловать</Typography>
-            <Typography variant='body2' color='text.secondary'>
-              Войдите, чтобы продолжить работу с админкой.
-            </Typography>
           </Stack>
           <TextField
             label='E-mail'
