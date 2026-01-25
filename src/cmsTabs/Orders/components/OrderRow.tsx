@@ -66,7 +66,7 @@ export const OrderRow: FC<IOrderRowProps> = ({ order, actionCallback }) => {
         <Typography>{order?.id}</Typography>
       </TableCell>
       <TableCell>
-        <Typography>{order?.user?.name}</Typography>
+        <Typography>{order?.user?.mail}</Typography>
       </TableCell>
       <TableCell>
         <Typography>{order?.sum} $</Typography>

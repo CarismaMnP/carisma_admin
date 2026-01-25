@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { Box, Button, InputAdornment, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, Divider, InputAdornment, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { FC, useState } from 'react';
 import { IOrder } from '@/cmsTabs/Orders/types';
 import { API } from '@/api';
 import { ORDER_STATE_OPTIONS } from '@/cmsTabs/Orders/utils.ts';
-import { ProductCard } from '@/cmsTabs/Products/components/ProductCard.tsx';
+import { MiniProductCard } from '@/cmsTabs/Orders/components/MiniProductCard.tsx';
 
 interface IOrderFormProps {
   onFinish: () => void;
@@ -12,28 +12,39 @@ interface IOrderFormProps {
   mode: 'create' | 'edit';
 }
 
+const formatDate = (dateString: string) => {
+  if (!dateString) return '-';
+  return new Date(dateString).toLocaleString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+const getStateColor = (state: string) => {
+  switch (state) {
+    case 'pending':
+      return 'warning';
+    case 'paid':
+      return 'success';
+    case 'shipped':
+      return 'info';
+    case 'delivered':
+      return 'success';
+    case 'cancelled':
+      return 'error';
+    default:
+      return 'default';
+  }
+};
+
 export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
   const isCreate = mode === 'create';
 
   const [state, setState] = useState<string>(order?.state || '');
   const [sum, setSum] = useState<number | ''>(order?.sum || '');
-  const [name] = useState(order?.name || '');
-  const [phone] = useState(order?.phone || '');
-  const [mail] = useState(order?.mail || '');
-  const [address] = useState(order?.address || '');
-  const [flat] = useState(order?.flat || '');
-  const [building] = useState(order?.building || '');
-  const [floor] = useState(order?.floor || '');
-  const [intercom] = useState(order?.intercom || '');
-  const [comment] = useState(order?.comment || '');
-  const [city] = useState(order?.city || '');
-  const [cdekCityId] = useState(order?.cdekCityId || '');
-  const [officeName] = useState(order?.officeName || '');
-  const [cdekOfficeId] = useState(order?.cdekOfficeId || '');
-  const [type] = useState(order?.type || '');
-  const [deliveryName] = useState(order?.deliveryName || '');
-  const [deliveryPrice] = useState(order?.deliveryPrice || '');
-  const [deliveryCdekId] = useState(order?.deliveryCdekId || '');
 
   const onSubmit = async () => {
     if (!sum) return;
@@ -51,19 +62,24 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
   return (
     <Stack
       gap='16px'
-      p='16px'
+      p='20px'
       width='100%'
       sx={{ background: 'linear-gradient(145deg, #ffffff 0%, #f5f7fb 100%)', borderRadius: '18px' }}
     >
-      <Stack gap={0.5}>
-        <Typography variant='h6'>{isCreate ? 'Новый заказ' : 'Редактировать заказ'}</Typography>
-        <Typography variant='body2' color='text.secondary'>
-          Обновите статус и сумму, чтобы синхронизировать заказ с пользователем.
-        </Typography>
+      <Stack direction='row' justifyContent='space-between' alignItems='flex-start'>
+        <Stack gap={0.5}>
+          <Typography variant='h6'>{isCreate ? 'New Order' : 'Edit Order'}</Typography>
+          <Typography variant='body2' color='text.secondary'>
+            Order ID: {order?.id}
+          </Typography>
+        </Stack>
+        <Chip label={order?.state} color={getStateColor(order?.state || '')} size='small' />
       </Stack>
 
+      <Divider />
+
       <Box display='grid' gridTemplateColumns='repeat(auto-fit, minmax(260px, 1fr))' gap='14px'>
-        <TextField label='Статус' select value={state} onChange={e => setState(e.target.value)}>
+        <TextField label='Status' select value={state} onChange={e => setState(e.target.value)}>
           {ORDER_STATE_OPTIONS.map(categoryOption => (
             <MenuItem key={categoryOption.value} value={categoryOption.value}>
               {categoryOption.label}
@@ -72,9 +88,9 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
         </TextField>
 
         <TextField
-          label='Сумма заказа'
+          label='Order Sum'
           fullWidth
-          placeholder='Введите сумму'
+          placeholder='Enter sum'
           value={sum}
           onChange={e => setSum(+e.target.value)}
           type='number'
@@ -86,47 +102,179 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
         />
       </Box>
 
-      <Stack gap='6px'>
-        <Typography variant='subtitle2' color='text.secondary'>
-          Данные клиента
+      <Stack gap='12px' p='16px' sx={{ background: '#f8fafc', borderRadius: '12px' }}>
+        <Typography variant='subtitle2' fontWeight={600}>
+          Order Summary
         </Typography>
-        <Typography fontSize={14}>Имя: {name}</Typography>
-        <Typography fontSize={14}>Телефон: {phone}</Typography>
-        <Typography fontSize={14}>Email: {mail}</Typography>
-        <Typography fontSize={14}>Тип доставки: {type}</Typography>
-        {cdekCityId && <Typography fontSize={14}>ID города в CDEK: {cdekCityId}</Typography>}
-        {officeName && <Typography fontSize={14}>ПВЗ: {officeName}</Typography>}
-        {cdekOfficeId && <Typography fontSize={14}>ID ПВЗ CDEK: {cdekOfficeId}</Typography>}
-        <Typography fontSize={14}>Способ доставки: {deliveryName}</Typography>
-        <Typography fontSize={14}>Тариф доставки: {deliveryPrice}$</Typography>
-        {deliveryCdekId && <Typography fontSize={14}>ID тарифа CDEK: {deliveryCdekId}</Typography>}
-        <Typography fontSize={14}>Город доставки: {city}</Typography>
-        {address && <Typography fontSize={14}>Адрес: {address}</Typography>}
-        {flat && <Typography fontSize={14}>Квартира: {flat}</Typography>}
-        {building && <Typography fontSize={14}>Подъезд: {building}</Typography>}
-        {floor && <Typography fontSize={14}>Этаж: {floor}</Typography>}
-        {intercom && <Typography fontSize={14}>Домофон: {intercom}</Typography>}
-        {comment && <Typography fontSize={14}>Комментарий: {comment}</Typography>}
+        <Stack direction='row' justifyContent='space-between'>
+          <Typography fontSize={14} color='text.secondary'>
+            Subtotal:
+          </Typography>
+          <Typography fontSize={14}>${order?.sum?.toFixed(2) || '0.00'}</Typography>
+        </Stack>
+        <Stack direction='row' justifyContent='space-between'>
+          <Typography fontSize={14} color='text.secondary'>
+            Tax:
+          </Typography>
+          <Typography fontSize={14}>${order?.tax?.toFixed(2) || '0.00'}</Typography>
+        </Stack>
+        <Divider />
+        <Stack direction='row' justifyContent='space-between'>
+          <Typography fontSize={14} fontWeight={600}>
+            Total:
+          </Typography>
+          <Typography fontSize={14} fontWeight={600}>
+            ${order?.total?.toFixed(2) || '0.00'}
+          </Typography>
+        </Stack>
+      </Stack>
+
+      <Stack gap='12px' p='16px' sx={{ background: '#f8fafc', borderRadius: '12px' }}>
+        <Typography variant='subtitle2' fontWeight={600}>
+          Customer Information
+        </Typography>
+        <Box display='grid' gridTemplateColumns='repeat(auto-fit, minmax(200px, 1fr))' gap='8px'>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              Full Name
+            </Typography>
+            <Typography fontSize={14}>{order?.fullName || '-'}</Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              Phone
+            </Typography>
+            <Typography fontSize={14}>{order?.phone || '-'}</Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              Email
+            </Typography>
+            <Typography fontSize={14}>{order?.mail || '-'}</Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              User ID
+            </Typography>
+            <Typography fontSize={14}>{order?.userId || '-'}</Typography>
+          </Stack>
+        </Box>
+      </Stack>
+
+      <Stack gap='12px' p='16px' sx={{ background: '#f8fafc', borderRadius: '12px' }}>
+        <Typography variant='subtitle2' fontWeight={600}>
+          Shipping Address
+        </Typography>
+        <Box display='grid' gridTemplateColumns='repeat(auto-fit, minmax(200px, 1fr))' gap='8px'>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              Delivery Type
+            </Typography>
+            <Typography fontSize={14} textTransform='uppercase'>
+              {order?.delivey_type || '-'}
+            </Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              Country
+            </Typography>
+            <Typography fontSize={14}>{order?.country || '-'}</Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              State
+            </Typography>
+            <Typography fontSize={14}>{order?.addressState || '-'}</Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              City
+            </Typography>
+            <Typography fontSize={14}>{order?.city || '-'}</Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              ZIP Code
+            </Typography>
+            <Typography fontSize={14}>{order?.zip_code || '-'}</Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              Address Line 1
+            </Typography>
+            <Typography fontSize={14}>{order?.address_line_1 || '-'}</Typography>
+          </Stack>
+          {order?.address_line_2 && (
+            <Stack>
+              <Typography fontSize={12} color='text.secondary'>
+                Address Line 2
+              </Typography>
+              <Typography fontSize={14}>{order?.address_line_2}</Typography>
+            </Stack>
+          )}
+        </Box>
+        {order?.delivery_instructions && (
+          <Stack mt={1}>
+            <Typography fontSize={12} color='text.secondary'>
+              Delivery Instructions
+            </Typography>
+            <Typography fontSize={14}>{order?.delivery_instructions}</Typography>
+          </Stack>
+        )}
+      </Stack>
+
+      <Stack gap='12px' p='16px' sx={{ background: '#f8fafc', borderRadius: '12px' }}>
+        <Typography variant='subtitle2' fontWeight={600}>
+          Payment & Dates
+        </Typography>
+        <Box display='grid' gridTemplateColumns='repeat(auto-fit, minmax(200px, 1fr))' gap='8px'>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              Stripe Payment Intent
+            </Typography>
+            <Typography fontSize={14} sx={{ wordBreak: 'break-all' }}>
+              {order?.stripePaymentIntentId || 'Not available'}
+            </Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              Created At
+            </Typography>
+            <Typography fontSize={14}>{formatDate(order?.createdAt || '')}</Typography>
+          </Stack>
+          <Stack>
+            <Typography fontSize={12} color='text.secondary'>
+              Updated At
+            </Typography>
+            <Typography fontSize={14}>{formatDate(order?.updatedAt || '')}</Typography>
+          </Stack>
+        </Box>
       </Stack>
 
       <Button fullWidth variant='contained' size='large' onClick={onSubmit}>
-        {isCreate ? 'Создать' : 'Сохранить изменения'}
+        {isCreate ? 'Create' : 'Save Changes'}
       </Button>
 
-      <Typography variant='subtitle2' color='text.secondary'>
-        Товары в заказе:
-      </Typography>
-      <Box display='grid' gridTemplateColumns='repeat(auto-fit, minmax(240px, 1fr))' width='100%' gap='12px'>
-        {order?.orderProducts?.map(product => (
-          <ProductCard
-            key={product?.id}
-            product={product?.product}
-            readonly
-            count={product?.count}
-            selectorValue={product?.selectorValue}
-          />
-        ))}
-      </Box>
+      <Stack gap='12px'>
+        <Typography variant='subtitle2' fontWeight={600}>
+          Order Products ({order?.orderProducts?.length || 0})
+        </Typography>
+        <Stack gap='8px'>
+          {order?.orderProducts?.map(item => (
+            <MiniProductCard
+              key={item?.id}
+              product={item?.product}
+              count={item?.count}
+              selectorValue={item?.selectorValue}
+            />
+          ))}
+          {(!order?.orderProducts || order?.orderProducts?.length === 0) && (
+            <Typography fontSize={14} color='text.secondary' textAlign='center' py={2}>
+              No products in this order
+            </Typography>
+          )}
+        </Stack>
+      </Stack>
     </Stack>
   );
 };

@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://api.carismamp.com/api/admin'
+  baseURL: import.meta.env.VITE_API_URL || 'http://api.carismamp.com/api/admin'
 })
 
 API.interceptors.request.use(
