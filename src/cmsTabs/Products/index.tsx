@@ -1,4 +1,14 @@
-import { Box, Button, Dialog, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Pagination,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { API } from '@/api';
 
@@ -11,12 +21,18 @@ export const ProductsTab = () => {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
 
+  const [page, setPage] = useState<number>(1);
+  const [limit] = useState<number>(20);
+  const [search, setSearch] = useState<string>('');
+
   const getProducts = async () => {
     try {
-      const { data: response } = await API.get('/product');
-      const rows = Array.isArray(response)
-        ? response
-        : response?.rows || response?.items || response?.data;
+      const params: any = { page, limit };
+      if (search) params.search = search;
+
+      const { data: response } = await API.get('/product', { params });
+
+      const rows = Array.isArray(response) ? response : response?.rows || response?.items || response?.data;
 
       if (rows) {
         const normalized = (rows as IProduct[]).filter((p: IProduct) => !p?.isDeleted);
@@ -35,7 +51,9 @@ export const ProductsTab = () => {
 
   useEffect(() => {
     getProducts();
-  }, []);
+  }, [page, search]);
+
+  const totalPages = Math.ceil(count / limit);
 
   return (
     <Stack gap='20px' width='100%'>
@@ -55,6 +73,16 @@ export const ProductsTab = () => {
           Добавить товар
         </Button>
       </Stack>
+
+      <TextField
+        label='Поиск по названию'
+        placeholder='Введите название товара'
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        fullWidth
+        sx={{ maxWidth: 400 }}
+      />
+
       <Stack width='100%' gap='20px'>
         <Box display='grid' gridTemplateColumns='repeat(auto-fit, minmax(260px, 1fr))' gap='20px'>
           {products?.map(product => (
@@ -62,13 +90,14 @@ export const ProductsTab = () => {
           ))}
         </Box>
 
+        {totalPages > 1 && (
+          <Stack alignItems='center'>
+            <Pagination count={totalPages} page={page} onChange={(_, value) => setPage(value)} color='primary' />
+          </Stack>
+        )}
+
         {showAddModal && (
-          <Dialog
-            maxWidth='md'
-            fullWidth
-            open={showAddModal}
-            onClose={() => setShowAddModal(false)}
-          >
+          <Dialog maxWidth='md' fullWidth open={showAddModal} onClose={() => setShowAddModal(false)}>
             <DialogTitle>Создать товар</DialogTitle>
             <DialogContent>
               <ProductForm onFinish={onFinishAdd} />

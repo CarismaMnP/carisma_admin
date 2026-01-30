@@ -9,6 +9,7 @@ export interface IProduct {
   link: string;
   images: (string | IProductImage)[];
   price: number;
+  make?: string;
   count?: number;
   ebayModel?: string;
   ebayCategory?: string;

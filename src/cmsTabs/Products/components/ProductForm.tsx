@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Box,
   Button,
   Divider,
@@ -14,25 +15,66 @@ import { MuiFileInput } from 'mui-file-input';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { checkFormValidation, normalizeJsonField } from '@/cmsTabs/Products/utils.ts';
 import { slugify } from 'transliteration';
+import { IProduct } from '@/cmsTabs/Products/types';
 
 interface IProductFormProps {
   onFinish: () => void;
+  product?: IProduct;
 }
 
-export const ProductForm: FC<IProductFormProps> = ({ onFinish }) => {
-  const [name, setName] = useState('');
-  const [link, setLink] = useState('');
-  const [price, setPrice] = useState<number | ''>('');
-  const [about, setAbout] = useState('');
-  const [additionalFields, setAdditionalFields] = useState('');
-  const [ebayCategory, setEbayCategory] = useState('');
-  const [ebayModel, setEbayModel] = useState('');
-  const [ebayYear, setEbayYear] = useState('');
-  const [ebayAdditionalNotes, setEbayAdditionalNotes] = useState('');
-  const [count, setCount] = useState<number | ''>('');
-  const [ebayAlsoFits, setEbayAlsoFits] = useState<string[]>([]);
+interface ICategory {
+  id: number;
+  name: string;
+  link: string;
+}
+
+export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
+  const [name, setName] = useState(product?.name || '');
+  const [link, setLink] = useState(product?.link || '');
+  const [price, setPrice] = useState<number | ''>(product?.price || '');
+  const [make, setMake] = useState(product?.make || '');
+  const [about, setAbout] = useState(product?.about || '');
+  const [additionalFields, setAdditionalFields] = useState(
+    typeof product?.additionalFields === 'object'
+      ? JSON.stringify(product.additionalFields, null, 2)
+      : product?.additionalFields || ''
+  );
+  const [ebayCategory, setEbayCategory] = useState(product?.ebayCategory || '');
+  const [ebayModel, setEbayModel] = useState(product?.ebayModel || '');
+  const [ebayYear, setEbayYear] = useState(product?.ebayYear || '');
+  const [ebayAdditionalNotes, setEbayAdditionalNotes] = useState(product?.ebayAdditionalNotes || '');
+  const [count, setCount] = useState<number | ''>(product?.count || '');
+  const [ebayAlsoFits, setEbayAlsoFits] = useState<string[]>(
+    Array.isArray(product?.ebayAlsoFits) ? product.ebayAlsoFits : []
+  );
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+
+  const [makes, setMakes] = useState<string[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
+
+  const fetchMakes = async () => {
+    try {
+      const { data } = await API.get('/product/makes');
+      setMakes(data || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const { data } = await API.get('/product/categories');
+      setCategories(data || []);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchMakes();
+    fetchCategories();
+  }, []);
 
   const onSubmit = async () => {
     if (!checkFormValidation(name, link, price)) return;
@@ -41,6 +83,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish }) => {
       name,
       link,
       price,
+      make: make || undefined,
       about: about || undefined,
       additionalFields: normalizeJsonField(additionalFields),
       ebayCategory: ebayCategory || undefined,
@@ -64,8 +107,10 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish }) => {
   };
 
   useEffect(() => {
-    setLink(slugify(name));
-  }, [name]);
+    if (!product) {
+      setLink(slugify(name));
+    }
+  }, [name, product]);
 
   useEffect(() => {
     if (!files?.length) {
@@ -87,9 +132,11 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish }) => {
       sx={{ background: 'linear-gradient(145deg, #ffffff 0%, #f5f7fb 100%)', borderRadius: '18px' }}
     >
       <Stack gap={0.5}>
-        <Typography variant='h6'>Добавить товар вручную</Typography>
+        <Typography variant='h6'>{product ? 'Копировать товар' : 'Добавить товар вручную'}</Typography>
         <Typography variant='body2' color='text.secondary'>
-          Заполните карточку и загрузите фото. Записи будут отмечены как isManual и не затрутся синхронизацией eBay.
+          {product
+            ? 'Данные скопированы из товара. Изображения нужно загрузить заново.'
+            : 'Заполните карточку и загрузите фото. Записи будут отмечены как isManual и не затрутся синхронизацией eBay.'}
         </Typography>
       </Stack>
 
@@ -134,20 +181,32 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish }) => {
           type='number'
         />
 
+        <Autocomplete
+          freeSolo
+          options={makes}
+          value={make}
+          onChange={(_, newValue) => setMake(newValue || '')}
+          onInputChange={(_, newValue) => setMake(newValue)}
+          renderInput={params => (
+            <TextField {...params} label='Марка автомобиля (Brand)' placeholder='Например, BMW, Mercedes' />
+          )}
+        />
+
+        <Autocomplete
+          freeSolo
+          options={categories.map(cat => cat.name)}
+          value={ebayCategory}
+          onChange={(_, newValue) => setEbayCategory(newValue || '')}
+          onInputChange={(_, newValue) => setEbayCategory(newValue)}
+          renderInput={params => <TextField {...params} label='Категория' placeholder='Выберите или введите категорию' />}
+        />
+
         <TextField
           label='Модель eBay'
           fullWidth
           placeholder='Например, Honda CR-V'
           value={ebayModel}
           onChange={e => setEbayModel(e.target.value)}
-        />
-
-        <TextField
-          label='Категория eBay'
-          fullWidth
-          placeholder='Категория eBay'
-          value={ebayCategory}
-          onChange={e => setEbayCategory(e.target.value)}
         />
 
         <TextField
@@ -243,7 +302,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish }) => {
       </Stack>
 
       <Button fullWidth variant='contained' size='large' onClick={onSubmit}>
-        Создать товар вручную
+        {product ? 'Создать копию товара' : 'Создать товар вручную'}
       </Button>
     </Stack>
   );

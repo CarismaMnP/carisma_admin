@@ -1,13 +1,16 @@
 import { Divider, IconButton, Paper, Stack } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { FC, ReactNode } from 'react';
 
 interface IActionsCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
+  onCopy?: () => void;
   showEdit?: boolean;
   showDelete?: boolean;
+  showCopy?: boolean;
   onClick?: () => void;
   children: ReactNode;
   readonly?: boolean;
@@ -16,10 +19,12 @@ interface IActionsCardProps {
 export const ActionsCard: FC<IActionsCardProps> = ({
   onEdit,
   onDelete,
+  onCopy,
   onClick,
   readonly,
   showEdit = true,
   showDelete = true,
+  showCopy = false,
   children,
 }) => {
   return (
@@ -38,13 +43,18 @@ export const ActionsCard: FC<IActionsCardProps> = ({
     >
       <Stack gap='12px' justifyContent='space-between' height='100%'>
         {children}
-        {!readonly && (showEdit || showDelete) && (
+        {!readonly && (showEdit || showDelete || showCopy) && (
           <Stack gap='8px'>
             <Divider />
             <Stack direction='row' gap='10px'>
               {showEdit && (
                 <IconButton onClick={onEdit}>
                   <EditIcon />
+                </IconButton>
+              )}
+              {showCopy && (
+                <IconButton onClick={onCopy}>
+                  <ContentCopyIcon />
                 </IconButton>
               )}
               {showDelete && (

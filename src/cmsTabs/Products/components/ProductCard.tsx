@@ -13,9 +13,9 @@ import {
 import { FC, useMemo, useState } from 'react';
 
 import { ActionsCard } from '@/shared';
-import { IProduct, IProductImage } from '@/cmsTabs/Products/types';
+import { IProduct } from '@/cmsTabs/Products/types';
 import { API } from '@/api';
-import { apiUrlBuilder } from '@/shared/utils/apiUrlBuilder.ts';
+import { ProductForm } from '@/cmsTabs/Products/components/ProductForm';
 
 interface IProductCardProps {
   product: IProduct;
@@ -33,6 +33,7 @@ export const ProductCard: FC<IProductCardProps> = ({
   selectorValue,
 }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
 
   const onFinishDelete = async () => {
     try {
@@ -44,10 +45,15 @@ export const ProductCard: FC<IProductCardProps> = ({
     }
   };
 
+  const onFinishCopy = async () => {
+    await actionCallback?.();
+    setShowCopyModal(false);
+  };
+
   const cover = useMemo(() => {
     const first = product?.images?.[0];
     if (!first) return undefined;
-    return first
+    return first;
   }, [product?.images]);
 
   const alsoFits = useMemo(() => {
@@ -57,7 +63,10 @@ export const ProductCard: FC<IProductCardProps> = ({
         const parsed = JSON.parse(product.ebayAlsoFits);
         if (Array.isArray(parsed)) return parsed;
       } catch {
-        return product.ebayAlsoFits.split(',').map(p => p.trim()).filter(Boolean);
+        return product.ebayAlsoFits
+          .split(',')
+          .map(p => p.trim())
+          .filter(Boolean);
       }
     }
     return product.ebayAlsoFits.filter(Boolean);
@@ -73,8 +82,10 @@ export const ProductCard: FC<IProductCardProps> = ({
       <ActionsCard
         readonly={readonly}
         onDelete={() => setShowDeleteModal(true)}
+        onCopy={() => setShowCopyModal(true)}
         showEdit={false}
         showDelete={!readonly}
+        showCopy={!readonly}
       >
         <Stack gap={1}>
           <Box
@@ -106,13 +117,14 @@ export const ProductCard: FC<IProductCardProps> = ({
               {stock !== null ? `В наличии: ${stock}` : 'Сток не указан'}
             </Typography>
           </Stack>
-          {(product?.ebayModel || product?.ebayCategory || selectorValue) && (
+          {(product?.ebayModel || product?.ebayCategory || product?.make || selectorValue) && (
             <Typography px='4px' variant='body2' color='text.secondary'>
-              {product?.ebayModel && `Модель: ${product.ebayModel}`} {product?.ebayCategory && `• Категория: ${product.ebayCategory}`}
+              {product?.make && `${product.make}`}
+              {product?.ebayModel && ` • ${product.ebayModel}`}
+              {product?.ebayCategory && ` • ${product.ebayCategory}`}
               {selectorValue && ` • ${selectorValue}`}
             </Typography>
           )}
-          
         </Stack>
       </ActionsCard>
 
@@ -130,6 +142,15 @@ export const ProductCard: FC<IProductCardProps> = ({
               Удалить
             </Button>
           </DialogActions>
+        </Dialog>
+      )}
+
+      {showCopyModal && (
+        <Dialog maxWidth='md' fullWidth open={showCopyModal} onClose={() => setShowCopyModal(false)}>
+          <DialogTitle>Копировать товар</DialogTitle>
+          <DialogContent>
+            <ProductForm product={product} onFinish={onFinishCopy} />
+          </DialogContent>
         </Dialog>
       )}
     </>
