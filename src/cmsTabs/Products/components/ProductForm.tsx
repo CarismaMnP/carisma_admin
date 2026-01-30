@@ -22,12 +22,6 @@ interface IProductFormProps {
   product?: IProduct;
 }
 
-interface ICategory {
-  id: number;
-  name: string;
-  link: string;
-}
-
 export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
   const [name, setName] = useState(product?.name || '');
   const [link, setLink] = useState(product?.link || '');
@@ -51,7 +45,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
   const [previews, setPreviews] = useState<string[]>([]);
 
   const [makes, setMakes] = useState<string[]>([]);
-  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
 
   const fetchMakes = async () => {
     try {
@@ -194,7 +188,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
 
         <Autocomplete
           freeSolo
-          options={categories.filter(cat => cat?.name).map(cat => cat.name)}
+          options={categories.filter(Boolean)}
           value={ebayCategory}
           onChange={(_, newValue) => setEbayCategory(newValue || '')}
           onInputChange={(_, newValue) => setEbayCategory(newValue)}
@@ -202,7 +196,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
         />
 
         <TextField
-          label='Модель eBay'
+          label='Модель'
           fullWidth
           placeholder='Например, Honda CR-V'
           value={ebayModel}
@@ -210,7 +204,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
         />
 
         <TextField
-          label='Год (eBay)'
+          label='Год'
           fullWidth
           placeholder='Например, 2019'
           value={ebayYear}
@@ -242,7 +236,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
         />
 
         <TextField
-          label='Примечания eBay'
+          label='Примечания'
           multiline
           minRows={3}
           fullWidth
@@ -253,7 +247,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
       </Box>
 
       <AddValuesField
-        label='Также подходит (eBay Also Fits)'
+        label='Также подходит'
         placeholder='Нажмите Enter, чтобы добавить'
         fullWidth
         value={ebayAlsoFits}
