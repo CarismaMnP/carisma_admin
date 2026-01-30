@@ -183,7 +183,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
 
         <Autocomplete
           freeSolo
-          options={makes}
+          options={makes.filter(Boolean)}
           value={make}
           onChange={(_, newValue) => setMake(newValue || '')}
           onInputChange={(_, newValue) => setMake(newValue)}
@@ -194,7 +194,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
 
         <Autocomplete
           freeSolo
-          options={categories.map(cat => cat.name)}
+          options={categories.filter(cat => cat?.name).map(cat => cat.name)}
           value={ebayCategory}
           onChange={(_, newValue) => setEbayCategory(newValue || '')}
           onInputChange={(_, newValue) => setEbayCategory(newValue)}
