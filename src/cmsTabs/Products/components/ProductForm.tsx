@@ -257,7 +257,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
       <Stack gap='12px'>
         <MuiFileInput
           label='Изображения товара'
-          inputProps={{ accept: '.png, .jpeg' }}
+          inputProps={{ accept: 'image/*' }}
           placeholder='Загрузите изображения'
           multiple
           value={files}

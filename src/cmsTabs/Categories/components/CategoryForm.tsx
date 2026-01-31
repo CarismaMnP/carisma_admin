@@ -196,7 +196,7 @@ export const CategoryForm: FC<ICategoryFormProps> = ({ onFinish, category, mode 
         <Stack gap='10px'>
           <MuiFileInput
             label='Обложка (вертикальная)'
-            inputProps={{ accept: '.png, .jpeg' }}
+            inputProps={{ accept: 'image/*' }}
             placeholder='Загрузите вертикальное изображение'
             value={file}
             onChange={setFile}
@@ -231,7 +231,7 @@ export const CategoryForm: FC<ICategoryFormProps> = ({ onFinish, category, mode 
         <Stack gap='10px'>
           <MuiFileInput
             label='Обложка (горизонтальная)'
-            inputProps={{ accept: '.png, .jpeg' }}
+            inputProps={{ accept: 'image/*' }}
             placeholder='Загрузите горизонтальное изображение'
             value={file2}
             onChange={setFile2}

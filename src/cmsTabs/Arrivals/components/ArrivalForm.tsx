@@ -130,7 +130,7 @@ export const ArrivalForm: FC<IArrivalFormProps> = ({ onFinish, arrival, mode }) 
 
       <MuiFileInput
         label='Изображение'
-        inputProps={{ accept: '.png, .jpeg, .jpg' }}
+        inputProps={{ accept: 'image/*' }}
         placeholder='Загрузите изображение'
         value={file}
         onChange={setFile}
