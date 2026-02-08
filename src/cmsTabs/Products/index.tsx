@@ -18,6 +18,7 @@ import { ProductForm } from '@/cmsTabs/Products/components/ProductForm';
 
 export const ProductsTab = () => {
   const [count, setCount] = useState<number>(0);
+  const [active, setActive] = useState<number>(0);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
 
@@ -38,6 +39,7 @@ export const ProductsTab = () => {
         const normalized = (rows as IProduct[]).filter((p: IProduct) => !p?.isDeleted);
         setProducts(normalized);
         setCount(response?.count || response?.total || normalized.length);
+        setActive(response?.active);
       }
     } catch (e) {
       console.error(e);
@@ -66,7 +68,7 @@ export const ProductsTab = () => {
         <Stack gap={0.5}>
           <Typography variant='h6'>Товары</Typography>
           <Typography variant='body2' color='text.secondary'>
-            Всего позиций: {count}
+            Всего позиций: {count}, Активные: {active}
           </Typography>
         </Stack>
         <Button variant='contained' onClick={() => setShowAddModal(true)}>

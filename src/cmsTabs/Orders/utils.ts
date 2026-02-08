@@ -8,8 +8,12 @@ export const ORDER_STATE_OPTIONS = [
     label: 'Оплачен',
   },
   {
+    value: 'expired',
+    label: 'Срок оплаты истек',
+  },
+  {
     value: 'confirmed',
-    label: 'Принят',
+    label: 'Оплачен',
   },
   {
     value: 'delivery',
