@@ -32,8 +32,14 @@ export const ProductCard: FC<IProductCardProps> = ({
   readonly,
   selectorValue,
 }) => {
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
+
+  const onFinishEdit = async () => {
+    await actionCallback?.();
+    setShowEditModal(false);
+  };
 
   const onFinishDelete = async () => {
     try {
@@ -81,9 +87,10 @@ export const ProductCard: FC<IProductCardProps> = ({
     <>
       <ActionsCard
         readonly={readonly}
+        onEdit={() => setShowEditModal(true)}
         onDelete={() => setShowDeleteModal(true)}
         onCopy={() => setShowCopyModal(true)}
-        showEdit={false}
+        showEdit={!readonly}
         showDelete={!readonly}
         showCopy={!readonly}
       >
@@ -128,6 +135,15 @@ export const ProductCard: FC<IProductCardProps> = ({
         </Stack>
       </ActionsCard>
 
+      {showEditModal && (
+        <Dialog maxWidth='md' fullWidth open={showEditModal} onClose={() => setShowEditModal(false)}>
+          <DialogTitle>Редактировать товар</DialogTitle>
+          <DialogContent>
+            <ProductForm mode='edit' product={product} onFinish={onFinishEdit} />
+          </DialogContent>
+        </Dialog>
+      )}
+
       {showDeleteModal && (
         <Dialog open={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
           <DialogTitle>Удалить товар?</DialogTitle>
@@ -149,7 +165,7 @@ export const ProductCard: FC<IProductCardProps> = ({
         <Dialog maxWidth='md' fullWidth open={showCopyModal} onClose={() => setShowCopyModal(false)}>
           <DialogTitle>Копировать товар</DialogTitle>
           <DialogContent>
-            <ProductForm product={product} onFinish={onFinishCopy} />
+            <ProductForm mode='copy' product={product} onFinish={onFinishCopy} />
           </DialogContent>
         </Dialog>
       )}

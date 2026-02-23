@@ -16,13 +16,19 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { checkFormValidation, normalizeJsonField } from '@/cmsTabs/Products/utils.ts';
 import { slugify } from 'transliteration';
 import { IProduct } from '@/cmsTabs/Products/types';
+import { apiUrlBuilder } from '@/shared/utils/apiUrlBuilder.ts';
 
 interface IProductFormProps {
   onFinish: () => void;
   product?: IProduct;
+  mode: 'create' | 'copy' | 'edit';
 }
 
-export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
+export const ProductForm: FC<IProductFormProps> = ({ onFinish, product, mode }) => {
+  const isCreate = mode === 'create';
+  const isCopy = mode === 'copy';
+  const isEdit = mode === 'edit';
+
   const [name, setName] = useState(product?.name || '');
   const [link, setLink] = useState(product?.link || '');
   const [price, setPrice] = useState<number | ''>(product?.price || '');
@@ -47,6 +53,35 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
   const [makes, setMakes] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
 
+  const getProductImageUrls = (currentProduct?: IProduct) => {
+    if (!currentProduct?.images?.length) return [];
+    return currentProduct.images
+      .map(image => (typeof image === 'string' ? image : image?.imageUrl || image?.previewUrl || ''))
+      .filter(Boolean);
+  };
+
+  const normalizeImageUrl = (url: string) => {
+    if (/^https?:\/\//i.test(url)) return url;
+    return apiUrlBuilder(url);
+  };
+
+  const getFileNameFromUrl = (url: string, index: number) => {
+    try {
+      const pathname = new URL(url, window.location.origin).pathname;
+      const name = pathname.split('/').filter(Boolean).pop();
+      return name || `product-image-${index + 1}`;
+    } catch {
+      return `product-image-${index + 1}`;
+    }
+  };
+
+  const fetchImageFile = async (url: string, index: number) => {
+    const normalizedUrl = normalizeImageUrl(url);
+    const response = await fetch(normalizedUrl);
+    const blob = await response.blob();
+    return new File([blob], getFileNameFromUrl(normalizedUrl, index), { type: blob.type || 'image/jpeg' });
+  };
+
   const fetchMakes = async () => {
     try {
       const { data } = await API.get('/product/makes');
@@ -69,6 +104,35 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
     fetchMakes();
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (!isEdit) return;
+
+    const imageUrls = getProductImageUrls(product);
+    if (!imageUrls.length) {
+      setFiles([]);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadImageFiles = async () => {
+      try {
+        const imageFiles = await Promise.all(imageUrls.map((url, index) => fetchImageFile(url, index)));
+        if (!isCancelled) {
+          setFiles(imageFiles);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    loadImageFiles();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isEdit, product]);
 
   const onSubmit = async () => {
     if (!checkFormValidation(name, link, price)) return;
@@ -93,7 +157,11 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
     formData.append('data', JSON.stringify(data));
 
     try {
-      await API.post('/product/manual', formData);
+      if (isEdit) {
+        await API.put('/product', formData, { params: { id: product?.id } });
+      } else {
+        await API.post('/product/manual', formData);
+      }
       onFinish && onFinish();
     } catch (e) {
       console.error(e);
@@ -101,10 +169,10 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
   };
 
   useEffect(() => {
-    if (!product) {
+    if (isCreate) {
       setLink(slugify(name));
     }
-  }, [name, product]);
+  }, [isCreate, name]);
 
   useEffect(() => {
     if (!files?.length) {
@@ -126,11 +194,15 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
       sx={{ background: 'linear-gradient(145deg, #ffffff 0%, #f5f7fb 100%)', borderRadius: '18px' }}
     >
       <Stack gap={0.5}>
-        <Typography variant='h6'>{product ? 'Копировать товар' : 'Добавить товар вручную'}</Typography>
+        <Typography variant='h6'>
+          {isEdit ? 'Редактировать товар' : isCopy ? 'Копировать товар' : 'Добавить товар вручную'}
+        </Typography>
         <Typography variant='body2' color='text.secondary'>
-          {product
-            ? 'Данные скопированы из товара. Изображения нужно загрузить заново.'
-            : 'Заполните карточку и загрузите фото. Записи будут отмечены как isManual и не затрутся синхронизацией eBay.'}
+          {isEdit
+            ? 'Обновите поля товара и при необходимости загрузите новые изображения.'
+            : isCopy
+              ? 'Данные скопированы из товара. Изображения нужно загрузить заново.'
+              : 'Заполните карточку и загрузите фото. Записи будут отмечены как isManual и не затрутся синхронизацией eBay.'}
         </Typography>
       </Stack>
 
@@ -296,7 +368,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product }) => {
       </Stack>
 
       <Button fullWidth variant='contained' size='large' onClick={onSubmit}>
-        {product ? 'Создать копию товара' : 'Создать товар вручную'}
+        {isEdit ? 'Сохранить изменения' : isCopy ? 'Создать копию товара' : 'Создать товар вручную'}
       </Button>
     </Stack>
   );

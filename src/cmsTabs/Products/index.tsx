@@ -102,7 +102,7 @@ export const ProductsTab = () => {
           <Dialog maxWidth='md' fullWidth open={showAddModal} onClose={() => setShowAddModal(false)}>
             <DialogTitle>Создать товар</DialogTitle>
             <DialogContent>
-              <ProductForm onFinish={onFinishAdd} />
+              <ProductForm mode='create' onFinish={onFinishAdd} />
             </DialogContent>
           </Dialog>
         )}
