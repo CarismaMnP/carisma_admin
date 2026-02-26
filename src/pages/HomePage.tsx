@@ -6,11 +6,13 @@ import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
+import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import { CategoriesTab } from '@/cmsTabs/Categories';
 import { ProductsTab } from '@/cmsTabs/Products';
 import { UsersTab } from '@/cmsTabs/Users';
 import { OrdersTab } from '@/cmsTabs/Orders';
 import { ArrivalsTab } from '@/cmsTabs/Arrivals';
+import { RequestsTab } from '@/cmsTabs/Requests';
 
 const tabsConfig = [
   { value: 'categories', label: 'Categories', icon: <CategoryOutlinedIcon /> },
@@ -18,6 +20,7 @@ const tabsConfig = [
   { value: 'products', label: 'Products', icon: <Inventory2OutlinedIcon /> },
   { value: 'users', label: 'Users', icon: <GroupOutlinedIcon /> },
   { value: 'orders', label: 'Orders', icon: <ReceiptLongOutlinedIcon /> },
+  { value: 'requests', label: 'Requests', icon: <ForumOutlinedIcon /> },
 ];
 
 const allowedTabs = tabsConfig.map(tab => tab.value);
@@ -77,6 +80,7 @@ export const HomePage = () => {
               <Route path='products' element={<ProductsTab />} />
               <Route path='users' element={<UsersTab />} />
               <Route path='orders' element={<OrdersTab />} />
+              <Route path='requests' element={<RequestsTab />} />
               <Route path='*' element={<Navigate to='/categories' replace />} />
             </Routes>
           </Box>
