@@ -12,9 +12,11 @@ import { ProductsTab } from '@/cmsTabs/Products';
 import { UsersTab } from '@/cmsTabs/Users';
 import { OrdersTab } from '@/cmsTabs/Orders';
 import { ArrivalsTab } from '@/cmsTabs/Arrivals';
+import { CarpartsTab } from '@/cmsTabs/Carparts';
 import { RequestsTab } from '@/cmsTabs/Requests';
 
 const tabsConfig = [
+  { value: 'carparts', label: 'Checkmate', icon: <Inventory2OutlinedIcon /> },
   { value: 'categories', label: 'Categories', icon: <CategoryOutlinedIcon /> },
   { value: 'arrivals', label: 'Latest arrivals', icon: <BoltOutlinedIcon /> },
   { value: 'products', label: 'Products', icon: <Inventory2OutlinedIcon /> },
@@ -75,6 +77,7 @@ export const HomePage = () => {
 
           <Box>
             <Routes>
+              <Route path='carparts' element={<CarpartsTab />} />
               <Route path='categories' element={<CategoriesTab />} />
               <Route path='arrivals' element={<ArrivalsTab />} />
               <Route path='products' element={<ProductsTab />} />

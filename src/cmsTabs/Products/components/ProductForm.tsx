@@ -30,7 +30,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product, mode }) 
   const isEdit = mode === 'edit';
 
   const [name, setName] = useState(product?.name || '');
-  const [link, setLink] = useState(product?.link || '');
+  const [link, setLink] = useState(isCopy ? `${product?.link || 'part'}-copy-${Date.now()}` : product?.link || '');
   const [price, setPrice] = useState<number | ''>(product?.price || '');
   const [make, setMake] = useState(product?.make || '');
   const [about, setAbout] = useState(product?.about || '');

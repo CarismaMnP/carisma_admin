@@ -2,6 +2,7 @@
 
 import {
   Box,
+  Chip,
   Button,
   Dialog,
   DialogActions,
@@ -90,11 +91,12 @@ export const ProductCard: FC<IProductCardProps> = ({
         onEdit={() => setShowEditModal(true)}
         onDelete={() => setShowDeleteModal(true)}
         onCopy={() => setShowCopyModal(true)}
-        showEdit={!readonly}
+        showEdit={!readonly && product.source !== 'carparts'}
         showDelete={!readonly}
         showCopy={!readonly}
       >
         <Stack gap={1}>
+          <Chip size='small' label={product.source === 'carparts' ? `Checkmate · ${product.carpartsTag || ''}` : 'Ручной товар'} />
           <Box
             width='100%'
             sx={{ aspectRatio: 1, overflow: 'hidden', borderRadius: '12px', background: '#f8fafc' }}
@@ -146,16 +148,16 @@ export const ProductCard: FC<IProductCardProps> = ({
 
       {showDeleteModal && (
         <Dialog open={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
-          <DialogTitle>Удалить товар?</DialogTitle>
+          <DialogTitle>Скрыть товар на сайте?</DialogTitle>
           <DialogContent>
-            <Typography>Удаление нельзя будет отменить.</Typography>
+            <Typography>Карточка исчезнет из каталога сайта. {product.source === 'carparts' ? 'Товар останется в Checkmate и на других площадках.' : 'Обмен с Checkmate не управляет этим товаром.'}</Typography>
           </DialogContent>
           <DialogActions>
             <Button variant='contained' onClick={() => setShowDeleteModal(false)}>
               Отмена
             </Button>
             <Button variant='contained' color='error' onClick={onFinishDelete}>
-              Удалить
+              Скрыть
             </Button>
           </DialogActions>
         </Dialog>
@@ -165,6 +167,7 @@ export const ProductCard: FC<IProductCardProps> = ({
         <Dialog maxWidth='md' fullWidth open={showCopyModal} onClose={() => setShowCopyModal(false)}>
           <DialogTitle>Копировать товар</DialogTitle>
           <DialogContent>
+            <Typography sx={{mb:2}}>Копия будет отдельным ручным товаром. Создавайте её только для другой физической детали.</Typography>
             <ProductForm mode='copy' product={product} onFinish={onFinishCopy} />
           </DialogContent>
         </Dialog>
