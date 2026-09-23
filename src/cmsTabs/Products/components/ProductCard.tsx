@@ -91,12 +91,12 @@ export const ProductCard: FC<IProductCardProps> = ({
         onEdit={() => setShowEditModal(true)}
         onDelete={() => setShowDeleteModal(true)}
         onCopy={() => setShowCopyModal(true)}
-        showEdit={!readonly && product.source !== 'carparts'}
+        showEdit={!readonly && product.source !== 'carparts' && product.source !== 'legacy'}
         showDelete={!readonly}
         showCopy={!readonly}
       >
         <Stack gap={1}>
-          <Chip size='small' label={product.source === 'carparts' ? `Checkmate · ${product.carpartsTag || ''}` : 'Ручной товар'} />
+          <Chip size='small' label={product.source === 'carparts' ? `Checkmate · ${product.carpartsTag || ''}` : product.source === 'legacy' ? 'Архив старого каталога' : 'Ручной товар'} />
           <Box
             width='100%'
             sx={{ aspectRatio: 1, overflow: 'hidden', borderRadius: '12px', background: '#f8fafc' }}
