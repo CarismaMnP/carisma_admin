@@ -1,4 +1,6 @@
 import {
+  Alert,
+  Chip,
   Button,
   Dialog,
   DialogActions,
@@ -32,13 +34,17 @@ export const OrderRow: FC<IOrderRowProps> = ({ order, actionCallback }) => {
 
   const [state, setState] = useState(order?.state);
 
-  const changeStatusHandler = async () => {
+  const [saving, setSaving] = useState(false);
+  const [statusError, setStatusError] = useState('');
+  const changeStatusHandler = async (nextState: string) => {
+    setSaving(true);setStatusError('');
     try {
-      await API.put('/order/state', { state }, { params: { id: order?.id } });
+      await API.put('/order/state', { state: nextState }, { params: { id: order?.id } });
+      setState(nextState);
       actionCallback && (await actionCallback());
     } catch (e) {
-      console.error(e);
-    }
+      setStatusError('Не удалось изменить статус');
+    } finally {setSaving(false);}
   };
 
   const onFinishEdit = async () => {
@@ -57,13 +63,14 @@ export const OrderRow: FC<IOrderRowProps> = ({ order, actionCallback }) => {
   };
 
   useEffect(() => {
-    changeStatusHandler();
-  }, [state]);
+    setState(order.state);
+  }, [order.state]);
 
   return (
     <TableRow>
       <TableCell>
         <Typography>{order?.id}</Typography>
+        {order.isIntegrationTest && <Chip size="small" label="Тест интеграции" color="warning" />}
       </TableCell>
       <TableCell>
         <Typography>{order?.user?.mail}</Typography>
@@ -72,13 +79,14 @@ export const OrderRow: FC<IOrderRowProps> = ({ order, actionCallback }) => {
         <Typography>{order?.sum} $</Typography>
       </TableCell>
       <TableCell>
-        <TextField select value={state} onChange={e => setState(e.target.value)}>
+        <TextField select value={state} disabled={saving} onChange={e => changeStatusHandler(e.target.value)}>
           {ORDER_STATE_OPTIONS.map(categoryOption => (
             <MenuItem key={categoryOption.value} value={categoryOption.value}>
               {categoryOption.label}
             </MenuItem>
           ))}
         </TextField>
+        {statusError && <Alert severity="error">{statusError}</Alert>}
       </TableCell>
       <TableCell>
         <Typography>{formatDate(order?.createdAt)}</Typography>

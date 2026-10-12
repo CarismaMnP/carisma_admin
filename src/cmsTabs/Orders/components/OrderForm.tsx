@@ -103,6 +103,8 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
       </Box>
 
       <Stack gap='12px' p='16px' sx={{ background: '#f8fafc', borderRadius: '12px' }}>
+        {order?.isIntegrationTest && <Typography color="warning.main">Тест интеграции · без реального платежа · не отправлять</Typography>}
+        {order?.checkmateInvoice && <Typography>Checkmate: счёт № {order.checkmateInvoice}, заказ № {order.checkmateWorkOrder} · без налога Checkmate</Typography>}
         <Typography variant='subtitle2' fontWeight={600}>
           Order Summary
         </Typography>
@@ -265,6 +267,7 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
               key={item?.id}
               product={item?.product}
               count={item?.count}
+              unitPriceCents={item?.unitPriceCents}
               selectorValue={item?.selectorValue}
             />
           ))}

@@ -19,6 +19,8 @@ export interface IProduct {
   ebayYear?: string;
   ebayAlsoFits?: string[] | string;
   isDeleted?: boolean;
+  adminHidden?: boolean;
+  websiteSold?: boolean;
   source?: 'manual' | 'carparts' | 'legacy';
   carpartsTag?: string;
   carpartsGuid?: string;

@@ -4,6 +4,9 @@ import { IProduct } from '@/cmsTabs/Products/types.ts';
 export interface IOrder {
   id: string;
   userId: number;
+  isIntegrationTest?: boolean;
+  checkmateWorkOrder?: string;
+  checkmateInvoice?: string;
   state: string;
   user?: IUser;
   sum: number;
@@ -27,6 +30,8 @@ export interface IOrder {
 }
 
 interface IOrderProduct {
+  unitPriceCents?: number | null;
+  productSnapshot?: {name: string};
   count: number;
   createdAt: string;
   id: number;

@@ -7,9 +7,9 @@ type SyncStatus = {
   catalog?: {finishedAt: string; sourceRows: number; available: number; reasons: Record<string, number>};
   carpartsAvailable: number; manualAvailable: number; legacyAvailable: number;
   images: {ready: number; pending: number; failed: number};
-  sales: {enabled: boolean; pending: number; review: number; recent: {id: string; orderId: string; productId: number; state: string; attempts: number; lastError?: string; updatedAt: string}[]};
+  sales: {enabled: boolean; pending: number; review: number; recent: {id: string; orderId: string; productId: number; state: string; attempts: number; result?: {state?: string; invoice?: string; workOrder?: string}; lastError?: string; updatedAt: string}[]};
 };
-const labels: Record<string,string> = {pending:'В очереди',processing:'Обрабатывается',retry:'Повтор при восстановлении связи',review:'Требует проверки',succeeded:'Удалено из Checkmate'};
+const labels: Record<string,string> = {pending:'В очереди',processing:'Обрабатывается',retry:'Повтор при восстановлении связи',review:'Требует проверки',succeeded:'Продажа проведена'};
 export const CarpartsTab = () => {
   const [data, setData] = useState<SyncStatus>();
   const [error, setError] = useState('');
@@ -23,7 +23,7 @@ export const CarpartsTab = () => {
     {error && <Alert severity='error'>{error}</Alert>}
     {data && <>
       <Alert severity={data.stale?'error':'success'}>{data.stale?'Данные об остатках устарели. Оплата товаров Checkmate временно приостановлена.':`Каталог обновлён: ${new Date(data.catalog!.finishedAt).toLocaleString('ru-RU')}. Проверка изменений — каждые 5 минут.`}</Alert>
-      {!data.sales.enabled && <Alert severity='warning'>Удаление оплаченных деталей из Checkmate пока выключено.</Alert>}
+      {!data.sales.enabled && <Alert severity='warning'>Проведение продаж в Checkmate пока выключено.</Alert>}
       {data.sales.review>0 && <Alert severity='error'>Требуют проверки: {data.sales.review} продаж. Эти детали скрыты на сайте; проверьте их состояние в Checkmate по заказам ниже.</Alert>}
       <Paper variant='outlined' sx={{p:2}}><Stack gap={1}>
         <Typography>На сайте: {data.carpartsAvailable} товаров Checkmate и {data.manualAvailable} ручных карточек.</Typography>
@@ -36,9 +36,9 @@ export const CarpartsTab = () => {
       <Typography variant='h6'>Последние продажи товаров Checkmate</Typography>
       {!data.sales.recent.length ? <Typography color='text.secondary'>После запуска обмена оплаченных заказов ещё не было.</Typography> : <Paper variant='outlined' sx={{overflowX:'auto'}}><Table size='small'>
         <TableHead><TableRow><TableCell>Заказ / товар</TableCell><TableCell>Результат</TableCell><TableCell>Обновление</TableCell></TableRow></TableHead>
-        <TableBody>{data.sales.recent.map(job=><TableRow key={job.id}><TableCell>{job.orderId}<br/>Товар № {job.productId}</TableCell><TableCell><Chip size='small' color={job.state==='succeeded'?'success':job.state==='review'?'error':'warning'} label={labels[job.state]||job.state}/>{job.lastError && <Typography variant='caption' display='block'>{job.lastError}</Typography>}</TableCell><TableCell>{new Date(job.updatedAt).toLocaleString('ru-RU')}</TableCell></TableRow>)}</TableBody>
+        <TableBody>{data.sales.recent.map(job=><TableRow key={job.id}><TableCell>{job.orderId}<br/>Товар № {job.productId}</TableCell><TableCell><Chip size='small' color={job.state==='succeeded'?'success':job.state==='review'?'error':'warning'} label={job.state === 'succeeded' && ['removed','already_removed'].includes(job.result?.state || '') ? 'Удалено (старый обмен)' : labels[job.state]||job.state}/>{job.result?.invoice && <Typography variant='caption' display='block'>Счёт № {job.result.invoice} · Заказ № {job.result.workOrder}</Typography>}{job.lastError && <Typography variant='caption' display='block'>{job.lastError}</Typography>}</TableCell><TableCell>{new Date(job.updatedAt).toLocaleString('ru-RU')}</TableCell></TableRow>)}</TableBody>
       </Table></Paper>}
-      <Typography color='text.secondary'>Товары Checkmate редактируются в Checkmate. Ручные карточки управляются только здесь. Возврат платежа не восстанавливает удалённую деталь автоматически.</Typography>
+      <Typography color='text.secondary'>Товары Checkmate редактируются в Checkmate. Ручные карточки управляются только здесь. Оплаченные детали проводятся как продажи с данными клиента, без налога Checkmate. Налог сайта сохраняется в заказе. Возвраты оформляются отдельно и не возвращают деталь в наличие автоматически.</Typography>
     </>}
   </Stack>;
 };

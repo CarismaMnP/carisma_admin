@@ -60,7 +60,7 @@ export const ProductCard: FC<IProductCardProps> = ({
   const cover = useMemo(() => {
     const first = product?.images?.[0];
     if (!first) return undefined;
-    return first;
+    return typeof first === "string" ? first : first.imageUrl;
   }, [product?.images]);
 
   const alsoFits = useMemo(() => {

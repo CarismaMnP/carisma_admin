@@ -7,13 +7,15 @@ import { IProduct } from '@/cmsTabs/Products/types';
 interface IMiniProductCardProps {
   product: IProduct;
   count: number;
+  unitPriceCents?: number | null;
   selectorValue?: string;
 }
 
-export const MiniProductCard: FC<IMiniProductCardProps> = ({ product, count, selectorValue }) => {
+export const MiniProductCard: FC<IMiniProductCardProps> = ({ product, count, selectorValue, unitPriceCents }) => {
+  const price = unitPriceCents != null ? unitPriceCents / 100 : product?.price;
   const cover = useMemo(() => {
     const first = product?.images?.[0];
-    return first || undefined;
+    return typeof first === "string" ? first : first?.imageUrl;
   }, [product?.images]);
 
   return (
@@ -59,7 +61,7 @@ export const MiniProductCard: FC<IMiniProductCardProps> = ({ product, count, sel
         </Typography>
         <Stack direction='row' gap={1} alignItems='center'>
           <Typography fontSize={13} color='text.secondary'>
-            {product?.price} $ x {count}
+            {price} $ x {count}
           </Typography>
           {selectorValue && (
             <Typography fontSize={12} color='text.secondary'>
@@ -71,7 +73,7 @@ export const MiniProductCard: FC<IMiniProductCardProps> = ({ product, count, sel
 
       <Stack justifyContent='center' alignItems='flex-end'>
         <Typography fontWeight={700} fontSize={14}>
-          {(product?.price * count).toFixed(2)} $
+          {(price * count).toFixed(2)} $
         </Typography>
       </Stack>
     </Stack>
