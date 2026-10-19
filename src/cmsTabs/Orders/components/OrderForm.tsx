@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Box, Button, Chip, Divider, InputAdornment, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Chip, Divider, InputAdornment, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { FC, useState } from 'react';
 import { IOrder } from '@/cmsTabs/Orders/types';
 import { API } from '@/api';
@@ -120,6 +120,9 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
           </Typography>
           <Typography fontSize={14}>${order?.tax?.toFixed(2) || '0.00'}</Typography>
         </Stack>
+        <Stack direction='row' justifyContent='space-between'><Typography fontSize={14} color='text.secondary'>Shipping:</Typography><Typography fontSize={14}>${Number(order?.shippingAmount || 0).toFixed(2)}</Typography></Stack>
+        {order?.shippingReview && <Alert severity='error'>Проверить доставку: {order.shippingReview}</Alert>}
+        {order?.freightSnapshot && <Alert severity='info'>Грузовая доставка: {order.freightSnapshot.result.selected.carrier}, ZIP {order.freightSnapshot.request.zip}, {order.freightSnapshot.request.shipmentItems.length} паллет. Страховка на ${Number(order.freightSnapshot.request.insuredCents/100).toFixed(2)}. Savtrans: {order.freightSnapshot.result.reference}. Заказ перевозки оформить у брокера.</Alert>}
         <Divider />
         <Stack direction='row' justifyContent='space-between'>
           <Typography fontSize={14} fontWeight={600}>

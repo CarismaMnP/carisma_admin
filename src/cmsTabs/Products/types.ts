@@ -24,4 +24,6 @@ export interface IProduct {
   source?: 'manual' | 'carparts' | 'legacy';
   carpartsTag?: string;
   carpartsGuid?: string;
+  carpartsPartCode?: string;
+  freightCategoryCode?: string;
 }

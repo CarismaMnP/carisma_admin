@@ -11,6 +11,10 @@ export interface IOrder {
   user?: IUser;
   sum: number;
   tax: number;
+  shippingAmount?: number|string;
+  shippingReview?: string;
+  freightQuoteId?: string;
+  freightSnapshot?: {request:{zip:string;addressType:string;insuredCents:number;shipmentItems:unknown[]};result:{reference:string;selected:{carrier:string};insuranceCents:number}};
   total: number;
   fullName: string;
   phone: string;

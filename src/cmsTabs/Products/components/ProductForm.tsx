@@ -4,6 +4,7 @@ import {
   Button,
   Divider,
   InputAdornment,
+  MenuItem,
   Stack,
   TextField,
   Typography,
@@ -39,6 +40,9 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product, mode }) 
       ? JSON.stringify(product.additionalFields, null, 2)
       : product?.additionalFields || ''
   );
+  const [freightCategoryCode,setFreightCategoryCode]=useState(product?.freightCategoryCode || (isCopy ? product?.carpartsPartCode : '') || '');
+  const [freightProfiles,setFreightProfiles]=useState<Array<{code:string;label:string;length:number;width:number;height:number;weight:number}>>([]);
+  useEffect(()=>{API.get('/freight/profiles').then(({data})=>setFreightProfiles(data)).catch(()=>{});},[]);
   const [ebayCategory, setEbayCategory] = useState(product?.ebayCategory || '');
   const [ebayModel, setEbayModel] = useState(product?.ebayModel || '');
   const [ebayYear, setEbayYear] = useState(product?.ebayYear || '');
@@ -144,6 +148,7 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product, mode }) 
       make: make || undefined,
       about: about || undefined,
       additionalFields: normalizeJsonField(additionalFields),
+      freightCategoryCode,
       ebayCategory: ebayCategory || undefined,
       ebayModel: ebayModel || undefined,
       ebayYear: ebayYear || undefined,
@@ -266,6 +271,11 @@ export const ProductForm: FC<IProductFormProps> = ({ onFinish, product, mode }) 
           onInputChange={(_, newValue) => setEbayCategory(newValue)}
           renderInput={params => <TextField {...params} label='Категория' placeholder='Выберите или введите категорию' />}
         />
+
+        <TextField select label='Грузовая доставка' value={freightCategoryCode} onChange={e=>setFreightCategoryCode(e.target.value)} helperText='Для крупных деталей расчёт доставки обязателен. Профиль задаёт размеры и вес упаковки.'>
+          <MenuItem value=''>Обычная доставка (маленькая деталь)</MenuItem>
+          {freightProfiles.map(p=><MenuItem key={p.code} value={p.code}>{p.code} · {p.label} · {p.length}×{p.width}×{p.height} in / {p.weight} lbs</MenuItem>)}
+        </TextField>
 
         <TextField
           label='Модель'
