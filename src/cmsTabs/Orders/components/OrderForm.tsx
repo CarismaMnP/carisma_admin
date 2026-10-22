@@ -105,6 +105,7 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
       <Stack gap='12px' p='16px' sx={{ background: '#f8fafc', borderRadius: '12px' }}>
         {order?.isIntegrationTest && <Typography color="warning.main">Тест интеграции · без реального платежа · не отправлять</Typography>}
         {order?.checkmateInvoice && <Typography>Checkmate: счёт № {order.checkmateInvoice}, заказ № {order.checkmateWorkOrder} · без налога Checkmate</Typography>}
+        {order?.checkmateWorkOrder && !order?.checkmateInvoice && <Typography>Передан в Checkmate как Work Order № {order.checkmateWorkOrder}. Проверка и финализация — менеджером в Checkmate.</Typography>}
         <Typography variant='subtitle2' fontWeight={600}>
           Order Summary
         </Typography>
