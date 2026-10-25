@@ -10,6 +10,8 @@ export interface IOrder {
   state: string;
   user?: IUser;
   sum: number;
+  promoCode?:string;
+  discountCents?:number;
   tax: number;
   shippingAmount?: number|string;
   shippingReview?: string;
@@ -35,7 +37,8 @@ export interface IOrder {
 
 interface IOrderProduct {
   unitPriceCents?: number | null;
-  productSnapshot?: {name: string};
+  discountCents?:number;
+  productSnapshot?: {name:string;stock?:string;tag?:string};
   count: number;
   createdAt: string;
   id: number;

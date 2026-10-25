@@ -1,6 +1,7 @@
 //@ts-nocheck
 
 import { Box, Stack, Typography } from '@mui/material';
+import {Link} from 'react-router-dom';
 import { FC, useMemo } from 'react';
 import { IProduct } from '@/cmsTabs/Products/types';
 
@@ -8,10 +9,12 @@ interface IMiniProductCardProps {
   product: IProduct;
   count: number;
   unitPriceCents?: number | null;
+  discountCents?: number;
+  productSnapshot?: {name?: string; stock?: string | null; tag?: string | null};
   selectorValue?: string;
 }
 
-export const MiniProductCard: FC<IMiniProductCardProps> = ({ product, count, selectorValue, unitPriceCents }) => {
+export const MiniProductCard: FC<IMiniProductCardProps> = ({ product, count, selectorValue, unitPriceCents, productSnapshot, discountCents=0 }) => {
   const price = unitPriceCents != null ? unitPriceCents / 100 : product?.price;
   const cover = useMemo(() => {
     const first = product?.images?.[0];
@@ -20,10 +23,13 @@ export const MiniProductCard: FC<IMiniProductCardProps> = ({ product, count, sel
 
   return (
     <Stack
+      component={product?.link?Link:'div'}
+      {...(product?.link?{to:'/products?product='+encodeURIComponent(product.link),target:'_blank',rel:'noopener noreferrer'}:{})}
       direction='row'
       gap={1.5}
       p={1.5}
       sx={{
+        color:'inherit',textDecoration:'none','&:hover':{borderColor:'#0f766e'},
         background: '#fff',
         borderRadius: '12px',
         border: '1px solid #e5e7eb',
@@ -57,8 +63,9 @@ export const MiniProductCard: FC<IMiniProductCardProps> = ({ product, count, sel
 
       <Stack flex={1} minWidth={0} justifyContent='center'>
         <Typography fontWeight={600} fontSize={14} noWrap>
-          {product?.name}
+          {productSnapshot?.name || product?.name}
         </Typography>
+        <Typography fontSize={12} color='text.secondary'>Stock number: {productSnapshot?.stock ?? product?.carpartsData?.stock ?? '—'} · Tag number: {productSnapshot?.tag ?? product?.carpartsTag ?? '—'}</Typography>
         <Stack direction='row' gap={1} alignItems='center'>
           <Typography fontSize={13} color='text.secondary'>
             {price} $ x {count}
@@ -73,7 +80,7 @@ export const MiniProductCard: FC<IMiniProductCardProps> = ({ product, count, sel
 
       <Stack justifyContent='center' alignItems='flex-end'>
         <Typography fontWeight={700} fontSize={14}>
-          {(price * count).toFixed(2)} $
+          {(price * count-discountCents/100).toFixed(2)} $
         </Typography>
       </Stack>
     </Stack>

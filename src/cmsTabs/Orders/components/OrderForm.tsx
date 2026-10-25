@@ -115,6 +115,7 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
           </Typography>
           <Typography fontSize={14}>${order?.sum?.toFixed(2) || '0.00'}</Typography>
         </Stack>
+        {!!order?.discountCents&&<Typography color='success.main'>Промокод {order.promoCode}: −${(order.discountCents/100).toFixed(2)} (учтён в Subtotal)</Typography>}
         <Stack direction='row' justifyContent='space-between'>
           <Typography fontSize={14} color='text.secondary'>
             Tax:
@@ -272,6 +273,8 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
               product={item?.product}
               count={item?.count}
               unitPriceCents={item?.unitPriceCents}
+              productSnapshot={item?.productSnapshot}
+              discountCents={item?.discountCents}
               selectorValue={item?.selectorValue}
             />
           ))}

@@ -15,6 +15,7 @@ import { FC, useMemo, useState } from 'react';
 
 import { ActionsCard } from '@/shared';
 import { IProduct } from '@/cmsTabs/Products/types';
+import { PriceEditor } from './PriceEditor';
 import { API } from '@/api';
 import { ProductForm } from '@/cmsTabs/Products/components/ProductForm';
 
@@ -33,6 +34,7 @@ export const ProductCard: FC<IProductCardProps> = ({
   readonly,
   selectorValue,
 }) => {
+  const [showPrice,setShowPrice]=useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
@@ -117,6 +119,7 @@ export const ProductCard: FC<IProductCardProps> = ({
           <Typography px='4px' fontWeight={700}>
             {product?.name}
           </Typography>
+          <Typography px='4px' variant='body2'>Stock number: {product.carpartsData?.stock || '—'} · Tag number: {product.carpartsTag || product.carpartsData?.tag || '—'}</Typography>
           <Typography px='4px' color='text.secondary'>
             {product?.about || 'Описание не указано'}
           </Typography>
@@ -126,6 +129,9 @@ export const ProductCard: FC<IProductCardProps> = ({
               {stock !== null ? `В наличии: ${stock}` : 'Сток не указан'}
             </Typography>
           </Stack>
+          {product.priceOverrideCents != null && <Chip size='small' color='info' label='Цена сайта зафиксирована' />}
+          {product.source==='carparts' && product.carpartsPriceCents != null && <Typography variant='body2'>Цена Checkmate: ${(product.carpartsPriceCents/100).toFixed(2)}</Typography>}
+          {!readonly && product.source!=='legacy' && <Button variant='outlined' onClick={()=>setShowPrice(true)}>Изменить цену сайта</Button>}
           {(product?.ebayModel || product?.ebayCategory || product?.make || selectorValue) && (
             <Typography px='4px' variant='body2' color='text.secondary'>
               {product?.make && `${product.make}`}
@@ -137,6 +143,7 @@ export const ProductCard: FC<IProductCardProps> = ({
         </Stack>
       </ActionsCard>
 
+      {showPrice && <PriceEditor selection={{mode:'ids',ids:[product.id]}} allowReset={product.source==='carparts'} onClose={()=>setShowPrice(false)} onSaved={()=>actionCallback?.()}/>}
       {showEditModal && (
         <Dialog maxWidth='md' fullWidth open={showEditModal} onClose={() => setShowEditModal(false)}>
           <DialogTitle>Редактировать товар</DialogTitle>

@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import { API } from '@/api';
 import { ProductCard } from './components/ProductCard';
 import { IProduct } from './types';
+import {PriceEditor,PriceSelection} from './components/PriceEditor';
 import { ProductForm } from './components/ProductForm';
 
 type Facet = {make: string; models: string[]};
@@ -16,6 +17,11 @@ export const ProductsTab = () => {
   paramsRef.current = params;
   const [products, setProducts] = useState<IProduct[]>([]);
   const [counts, setCounts] = useState({count:0, active:0, inactive:0});
+  const [categories,setCategories]=useState<string[]>([]);
+  const [allSelected,setAllSelected]=useState(false);
+  const [selectionIds,setSelectionIds]=useState<Set<number>>(new Set());
+  const [priceSelection,setPriceSelection]=useState<PriceSelection|null>(null);
+  const [notice,setNotice]=useState('');
   const [facets, setFacets] = useState<Facet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -52,6 +58,15 @@ export const ProductsTab = () => {
       .catch(() => {if (!controller.signal.aborted) setFacetError(true);});
     return () => controller.abort();
   },[revision]);
+  const selectionFilter=new URLSearchParams(params);selectionFilter.delete('page');selectionFilter.delete('limit');selectionFilter.delete('sort');selectionFilter.delete('product');
+  const filterKey=selectionFilter.toString();
+  useEffect(()=>{setAllSelected(false);setSelectionIds(new Set());},[filterKey]);
+  useEffect(()=>{API.get<string[]>('/product/categories').then(r=>setCategories(r.data)).catch(()=>setFacetError(true));},[]);
+  const deepLink=params.get('product');
+  useEffect(()=>{if(!deepLink)return;const c=new AbortController();API.get('/product/'+encodeURIComponent(deepLink),{signal:c.signal}).then(r=>{if(!c.signal.aborted)setSelected(r.data)}).catch(()=>{if(!c.signal.aborted)setError('Товар не найден')});return()=>c.abort();},[deepLink]);
+  const checked=(id:number)=>allSelected?!selectionIds.has(id):selectionIds.has(id);
+  const toggle=(id:number)=>setSelectionIds(old=>{const n=new Set(old);if(n.has(id))n.delete(id);else n.add(id);return n});
+  const selectedCount=allSelected?Math.max(0,counts.count-selectionIds.size):selectionIds.size;
   const query = params.toString();
   useEffect(() => {
     if (priceError) {setLoading(false);return;}
@@ -69,6 +84,7 @@ export const ProductsTab = () => {
     return () => controller.abort();
   },[query,revision,priceError]);
   const refresh = async () => {setSelected(null);setRevision(n => n+1);};
+  const closeProduct=()=>{setSelected(null);if(deepLink)change({product:''},false)};
   const status = (p: IProduct) => p.isDeleted || p.adminHidden ? 'Скрыт' : Number(p.count) > 0 ? 'Активен' : p.websiteSold ? 'Продан на сайте' : 'Нет в наличии';
   const source = (p: IProduct) => p.source === 'carparts' ? 'Checkmate' : p.source === 'legacy' ? 'Архив eBay' : 'Вручную';
   return <Stack gap={2} width='100%'>
@@ -102,6 +118,7 @@ export const ProductsTab = () => {
           <TextField label='Цена до, $' type='number' value={max} onChange={e => change({maxPrice:e.target.value})} size='small'
             error={priceError} slotProps={{htmlInput:{min:0,step:0.01}}} sx={{width:{xs:'100%',md:150}}} />
         </Stack>
+        <Autocomplete options={categories} value={params.get('category')||null} size='small' onChange={(_,v)=>change({category:v||''})} renderInput={p=><TextField {...p} label='Категория'/>}/>
         <Stack direction='row' flexWrap='wrap' alignItems='center' gap={1}>
           <FormControlLabel control={<Checkbox checked={active} onChange={e => change({active:String(e.target.checked)})} />} label={`Активные (${counts.active.toLocaleString()})`} />
           <FormControlLabel control={<Checkbox checked={inactive} onChange={e => change({inactive:String(e.target.checked)})} />} label={`Неактивные (${counts.inactive.toLocaleString()})`} />
@@ -109,6 +126,7 @@ export const ProductsTab = () => {
         </Stack>
       </Stack>
     </Paper>
+    {notice&&<Alert severity='success' onClose={()=>setNotice('')}>{notice}</Alert>}
     {priceError && <Alert severity='warning'>Укажите положительный диапазон цен: цена «от» не должна превышать цену «до».</Alert>}
     {facetError && <Alert severity='warning' action={<Button onClick={() => setRevision(n => n+1)}>Повторить</Button>}>Не удалось загрузить марки и модели.</Alert>}
     {error && <Alert severity='error' action={<Button onClick={() => setRevision(n => n+1)}>Повторить</Button>}>{error}</Alert>}
@@ -118,14 +136,17 @@ export const ProductsTab = () => {
         {[25,50,100].map(n => <MenuItem key={n} value={n}>{n}</MenuItem>)}
       </TextField>
     </Stack>
+    <Paper variant='outlined' sx={{p:2}}><Stack direction={{xs:'column',sm:'row'}} gap={1} alignItems='center'>
+      <Typography>Выбрано: {selectedCount.toLocaleString()}</Typography><Button disabled={loading||priceError||!counts.count} onClick={()=>{setAllSelected(true);setSelectionIds(new Set())}}>Выбрать все {counts.count.toLocaleString()} по фильтру</Button><Button onClick={()=>{setAllSelected(false);setSelectionIds(new Set())}}>Снять выбор</Button><Box sx={{flex:1}}/><Button variant='contained' disabled={loading||priceError||!selectedCount} onClick={()=>setPriceSelection(allSelected?{mode:'filter',filters:Object.fromEntries(selectionFilter),excludedIds:[...selectionIds]}:{mode:'ids',ids:[...selectionIds]})}>Изменить цены</Button>
+    </Stack>{allSelected&&<Typography variant='caption'>Выбраны товары на всех страницах. Снимите галочки с товаров, которые нужно исключить. Изменение фильтров сбрасывает выбор.</Typography>}</Paper>
     <Paper variant='outlined' sx={{overflow:'hidden',borderRadius:2}}>
       {loading && <LinearProgress />}
       <TableContainer><Table size='small' sx={{minWidth:850,opacity:loading || priceError ? 0.5 : 1}}>
-        <TableHead><TableRow><TableCell>Товар</TableCell><TableCell>Марка / модель</TableCell><TableCell>Статус</TableCell>
+        <TableHead><TableRow><TableCell padding='checkbox'><Checkbox inputProps={{'aria-label':'Выбрать товары на странице'}} checked={products.length>0&&products.every(p=>checked(p.id))} indeterminate={products.some(p=>checked(p.id))&&!products.every(p=>checked(p.id))} disabled={loading||priceError} onChange={e=>{const selected=e.target.checked;setSelectionIds(old=>{const n=new Set(old);products.forEach(p=>{if(selected!==allSelected)n.add(p.id);else n.delete(p.id)});return n})}}/></TableCell><TableCell>Товар</TableCell><TableCell>Марка / модель</TableCell><TableCell>Статус</TableCell>
           <TableCell align='right'>Цена</TableCell><TableCell align='right'>Остаток</TableCell><TableCell /></TableRow></TableHead>
         <TableBody>{products.map(p => {
           const image = p.images?.[0];const url = typeof image === 'string' ? image : image?.previewUrl || image?.imageUrl;
-          return <TableRow key={p.id} hover>
+          return <TableRow key={p.id} hover selected={checked(p.id)}><TableCell padding='checkbox'><Checkbox inputProps={{'aria-label':`Выбрать ${p.name}`}} checked={checked(p.id)} disabled={loading||priceError} onChange={()=>toggle(p.id)}/></TableCell>
             <TableCell sx={{maxWidth:480}}><Stack direction='row' gap={1.5} alignItems='center' py={1}>
               <Box sx={{width:52,height:52,flexShrink:0,bgcolor:'#f1f5f9',borderRadius:1,overflow:'hidden'}}>
                 {url && <Box component='img' src={url} alt='' loading='lazy' sx={{width:'100%',height:'100%',objectFit:'contain'}} />}</Box>
@@ -134,7 +155,7 @@ export const ProductsTab = () => {
             </Stack></TableCell>
             <TableCell>{p.make || '—'}<Typography variant='body2' color='text.secondary'>{p.ebayModel || '—'}</Typography></TableCell>
             <TableCell><Chip size='small' variant='outlined' color={!p.isDeleted && Number(p.count)>0 ? 'success':'default'} label={status(p)} /></TableCell>
-            <TableCell align='right' sx={{whiteSpace:'nowrap',fontWeight:600}}>{money(Number(p.price))}</TableCell>
+            <TableCell align='right' sx={{whiteSpace:'nowrap',fontWeight:600}}>{money(Number(p.price))}{p.priceOverrideCents!=null&&<Typography variant='caption' display='block' color='info.main'>Цена сайта</Typography>}</TableCell>
             <TableCell align='right'>{p.count ?? 0}</TableCell><TableCell><Button size='small' onClick={() => setSelected(p)}>Подробнее</Button></TableCell>
           </TableRow>;
         })}</TableBody>
@@ -146,8 +167,9 @@ export const ProductsTab = () => {
       onChange={(_,n) => change({page:String(n)},false)} disabled={loading || priceError} /></Stack>}
     <Dialog maxWidth='md' fullWidth open={showAdd} onClose={() => setShowAdd(false)}><DialogTitle>Создать товар</DialogTitle>
       <DialogContent>{showAdd && <ProductForm mode='create' onFinish={async () => {setShowAdd(false);await refresh();}} />}</DialogContent></Dialog>
-    <Dialog maxWidth='sm' fullWidth open={!!selected} onClose={() => setSelected(null)}><DialogTitle>Карточка товара</DialogTitle>
+    <Dialog maxWidth='sm' fullWidth open={!!selected} onClose={closeProduct}><DialogTitle>Карточка товара</DialogTitle>
       <DialogContent>{selected && <ProductCard product={selected} actionCallback={refresh} />}</DialogContent>
-      <DialogActions><Button onClick={() => setSelected(null)}>Закрыть</Button></DialogActions></Dialog>
+      <DialogActions><Button onClick={closeProduct}>Закрыть</Button></DialogActions></Dialog>
+    {priceSelection&&<PriceEditor selection={priceSelection} onClose={()=>setPriceSelection(null)} onSaved={()=>{setNotice('Цены обновлены. Ручные цены защищены от синхронизации Checkmate.');setAllSelected(false);setSelectionIds(new Set());refresh()}}/>}
   </Stack>;
 };

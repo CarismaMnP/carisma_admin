@@ -23,6 +23,9 @@ export interface IProduct {
   websiteSold?: boolean;
   source?: 'manual' | 'carparts' | 'legacy';
   carpartsTag?: string;
+  carpartsData?: {stock?:string;tag?:string};
+  carpartsPriceCents?: number|null;
+  priceOverrideCents?: number|null;
   carpartsGuid?: string;
   carpartsPartCode?: string;
   freightCategoryCode?: string;

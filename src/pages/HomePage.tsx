@@ -8,6 +8,7 @@ import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import { CategoriesTab } from '@/cmsTabs/Categories';
+import { PromoCodesTab } from '@/cmsTabs/PromoCodes';
 import { ProductsTab } from '@/cmsTabs/Products';
 import { UsersTab } from '@/cmsTabs/Users';
 import { OrdersTab } from '@/cmsTabs/Orders';
@@ -22,6 +23,7 @@ const tabsConfig = [
   { value: 'categories', label: 'Categories', icon: <CategoryOutlinedIcon /> },
   { value: 'arrivals', label: 'Latest arrivals', icon: <BoltOutlinedIcon /> },
   { value: 'products', label: 'Products', icon: <Inventory2OutlinedIcon /> },
+  { value: 'promo-codes', label: 'Promo codes', icon: <ReceiptLongOutlinedIcon /> },
   { value: 'users', label: 'Users', icon: <GroupOutlinedIcon /> },
   { value: 'orders', label: 'Orders', icon: <ReceiptLongOutlinedIcon /> },
   { value: 'requests', label: 'Requests', icon: <ForumOutlinedIcon /> },
@@ -84,6 +86,7 @@ export const HomePage = () => {
               <Route path='categories' element={<CategoriesTab />} />
               <Route path='arrivals' element={<ArrivalsTab />} />
               <Route path='products' element={<ProductsTab />} />
+              <Route path='promo-codes' element={<PromoCodesTab />} />
               <Route path='users' element={<UsersTab />} />
               <Route path='orders' element={<OrdersTab />} />
               <Route path='requests' element={<RequestsTab />} />
