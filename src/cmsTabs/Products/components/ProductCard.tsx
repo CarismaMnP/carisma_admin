@@ -15,6 +15,7 @@ import { FC, useMemo, useState } from 'react';
 
 import { ActionsCard } from '@/shared';
 import { IProduct } from '@/cmsTabs/Products/types';
+import { PackageEditor } from './PackageEditor';
 import { PriceEditor } from './PriceEditor';
 import { API } from '@/api';
 import { ProductForm } from '@/cmsTabs/Products/components/ProductForm';
@@ -34,6 +35,7 @@ export const ProductCard: FC<IProductCardProps> = ({
   readonly,
   selectorValue,
 }) => {
+  const [showPackage,setShowPackage]=useState(false);
   const [showPrice,setShowPrice]=useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -132,6 +134,7 @@ export const ProductCard: FC<IProductCardProps> = ({
           {product.priceOverrideCents != null && <Chip size='small' color='info' label='Цена сайта зафиксирована' />}
           {product.source==='carparts' && product.carpartsPriceCents != null && <Typography variant='body2'>Цена Checkmate: ${(product.carpartsPriceCents/100).toFixed(2)}</Typography>}
           {!readonly && product.source!=='legacy' && <Button variant='outlined' onClick={()=>setShowPrice(true)}>Изменить цену сайта</Button>}
+          {!readonly&&product.source!=='legacy'&&<Button variant='outlined' onClick={()=>setShowPackage(true)}>{product.parcelPackage?'Упаковка FedEx: '+product.parcelPackage.weightLb+' lb':'Указать упаковку FedEx'}</Button>}
           {(product?.ebayModel || product?.ebayCategory || product?.make || selectorValue) && (
             <Typography px='4px' variant='body2' color='text.secondary'>
               {product?.make && `${product.make}`}
@@ -143,6 +146,7 @@ export const ProductCard: FC<IProductCardProps> = ({
         </Stack>
       </ActionsCard>
 
+      {showPackage&&<PackageEditor product={product} onClose={()=>setShowPackage(false)} onSaved={()=>actionCallback?.()}/>}
       {showPrice && <PriceEditor selection={{mode:'ids',ids:[product.id]}} allowReset={product.source==='carparts'} onClose={()=>setShowPrice(false)} onSaved={()=>actionCallback?.()}/>}
       {showEditModal && (
         <Dialog maxWidth='md' fullWidth open={showEditModal} onClose={() => setShowEditModal(false)}>

@@ -29,4 +29,5 @@ export interface IProduct {
   carpartsGuid?: string;
   carpartsPartCode?: string;
   freightCategoryCode?: string;
+  parcelPackage?: {weightLb:number;lengthIn:number;widthIn:number;heightIn:number}|null;
 }

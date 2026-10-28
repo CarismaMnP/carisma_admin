@@ -1,11 +1,13 @@
 import {useEffect,useState} from 'react';
 import {Alert,Box,Button,Chip,Dialog,DialogContent,DialogTitle,MenuItem,Pagination,Stack,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,TextField,Typography} from '@mui/material';
+import {Tabs,Tab} from '@mui/material';
+import {ParcelQuotes} from './ParcelQuotes';
 import {API} from '@/api';
 type Item={productId:number;name:string;code:string;length:number;width:number;height:number;weight:number;freightClass:number;nmfc:string;commodity:string};
 type Rate={carrier:string;amountCents:number;transitDays:number|null};
 type Quote={id:string;userId:number;createdAt:string;expiresAt:string;status:string;error:string|null;amountCents:number;request:{zip:string;originZip:string;addressType:string;limitedAccess:boolean;insuredCents:number;shipmentItems:Item[]};result:null|{reference:string;insuranceCents:number;selected:Rate;rates:Rate[]}};
 const money=(cents:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(cents/100);
-export const FreightTab=()=>{
+const SavtransTab=()=>{
  const [page,setPage]=useState(1),[status,setStatus]=useState(''),[zip,setZip]=useState(''),[refresh,setRefresh]=useState(0);
  const [rows,setRows]=useState<Quote[]>([]),[count,setCount]=useState(0),[error,setError]=useState(''),[loading,setLoading]=useState(false),[selected,setSelected]=useState<Quote|null>(null);
  useEffect(()=>{const controller=new AbortController();setLoading(true);setError('');
@@ -27,3 +29,5 @@ export const FreightTab=()=>{
   </Stack>}</DialogContent></Dialog>
  </Stack>;
 };
+
+export const FreightTab=()=>{const [tab,setTab]=useState(0);return <Stack gap={2}><Tabs value={tab} onChange={(_,value)=>setTab(value)}><Tab label="Крупные детали · Savtrans"/><Tab label="Посылки · FedEx"/></Tabs>{tab===0?<SavtransTab/>:<ParcelQuotes/>}</Stack>};
