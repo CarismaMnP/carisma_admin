@@ -13,7 +13,7 @@ interface IUserRowProps {
 export const UserRow: FC<IUserRowProps> = ({ user }) => {
   return (
     <TableRow key={user.id}>
-      <TableCell><Typography>{user.name}</Typography></TableCell>
+      <TableCell><Typography>{user.name}</Typography>{user.resaleTaxExempt&&<Typography variant='caption' color='success.main'>Resale approved</Typography>}</TableCell>
       <TableCell><Typography>{user.mail}</Typography></TableCell>
       <TableCell><Typography>{user.phone}</Typography></TableCell>
       <TableCell><Typography>{user.category}</Typography></TableCell>

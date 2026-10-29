@@ -1,4 +1,5 @@
 export interface IUser {
+  resaleTaxExempt?: boolean;
   id: number;
   name: string;
   mail: string;

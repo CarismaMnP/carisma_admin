@@ -2,6 +2,9 @@ import { IUser } from '@/cmsTabs/Users/types.ts';
 import { IProduct } from '@/cmsTabs/Products/types.ts';
 
 export interface IOrder {
+  resaleRequested?: boolean;
+  resaleTaxExempt?: boolean;
+  resaleSnapshot?: {applicationId:string;companyName:string;status:string};
   id: string;
   userId: number;
   isIntegrationTest?: boolean;

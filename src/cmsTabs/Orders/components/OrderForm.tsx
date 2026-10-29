@@ -122,6 +122,7 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
           </Typography>
           <Typography fontSize={14}>${order?.tax?.toFixed(2) || '0.00'}</Typography>
         </Stack>
+        {order?.resaleRequested&&<Alert severity={order.resaleTaxExempt?'success':'info'}>{order.resaleTaxExempt?'Resale: освобождение от налога применено':'Resale: документ ожидал одобрения, налог рассчитывается по обычным правилам'}. {order.resaleSnapshot?.companyName} · сертификат {order.resaleSnapshot?.applicationId}</Alert>}
         <Stack direction='row' justifyContent='space-between'><Typography fontSize={14} color='text.secondary'>Shipping:</Typography><Typography fontSize={14}>${Number(order?.shippingAmount || 0).toFixed(2)}</Typography></Stack>
         {order?.shippingReview && <Alert severity='error'>Проверить доставку: {order.shippingReview}</Alert>}
         {order?.freightSnapshot && <Alert severity='info'>Грузовая доставка: {order.freightSnapshot.result.selected.carrier}, ZIP {order.freightSnapshot.request.zip}, {order.freightSnapshot.request.shipmentItems.length} паллет. Страховка на ${Number(order.freightSnapshot.request.insuredCents/100).toFixed(2)}. Savtrans: {order.freightSnapshot.result.reference}. Заказ перевозки оформить у брокера.</Alert>}
