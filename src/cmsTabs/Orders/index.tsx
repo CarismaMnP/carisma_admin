@@ -1,3 +1,5 @@
+import {useSearchParams} from 'react-router-dom';
+import {Alert,Button} from '@mui/material';
 import { ChangeEvent, useEffect, useState } from 'react';
 import {
   Table,
@@ -14,6 +16,9 @@ import { IOrder } from './types';
 import { OrderRow } from './components/OrderRow.tsx';
 
 export const OrdersTab = () => {
+  const [params,setParams] = useSearchParams();
+  const orderId=params.get('orderId') || '';
+  useEffect(()=>setPage(0),[orderId]);
   const [orders, setOrders] = useState<IOrder[]>([]);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(25);
@@ -22,7 +27,7 @@ export const OrdersTab = () => {
   const fetchOrders = async () => {
     try {
       const { data: response } = await API.get('/order', {
-        params: { page: page + 1, limit: rowsPerPage },
+        params: { page: page + 1, limit: rowsPerPage, orderId },
       });
       if (response) {
         setOrders(response.rows);
@@ -35,7 +40,7 @@ export const OrdersTab = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, orderId]);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -48,6 +53,7 @@ export const OrdersTab = () => {
 
   return (
     <>
+      {orderId&&<Alert severity='info' sx={{mb:2}} action={<Button onClick={()=>setParams({})}>Все заказы</Button>}>Заказ #{orderId.slice(0,8).toUpperCase()}</Alert>}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>

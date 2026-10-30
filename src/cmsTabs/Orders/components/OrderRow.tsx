@@ -81,7 +81,7 @@ export const OrderRow: FC<IOrderRowProps> = ({ order, actionCallback }) => {
         <Typography>{order?.sum} $</Typography>
       </TableCell>
       <TableCell>
-        <TextField select value={state} disabled={saving} onChange={e => changeStatusHandler(e.target.value)}>
+        <TextField select value={state} disabled={saving || order.state==='refunded'} onChange={e => changeStatusHandler(e.target.value)}>
           {ORDER_STATE_OPTIONS.map(categoryOption => (
             <MenuItem key={categoryOption.value} value={categoryOption.value}>
               {categoryOption.label}

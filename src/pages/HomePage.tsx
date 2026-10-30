@@ -16,9 +16,11 @@ import { ArrivalsTab } from '@/cmsTabs/Arrivals';
 import { FreightTab } from '@/cmsTabs/Freight';
 import { CarpartsTab } from '@/cmsTabs/Carparts';
 import {ResaleTab} from '@/cmsTabs/Resale';
+import {RefundsTab} from '@/cmsTabs/Refunds';
 import { RequestsTab } from '@/cmsTabs/Requests';
 
 const tabsConfig = [
+  {value:'refunds',label:'Refunds',icon:<ReceiptLongOutlinedIcon/>},
   {value:'resale',label:'Resale certificates',icon:<ReceiptLongOutlinedIcon/>},
   { value: 'freight', label: 'Freight', icon: <ReceiptLongOutlinedIcon /> },
   { value: 'carparts', label: 'Checkmate', icon: <Inventory2OutlinedIcon /> },
@@ -83,6 +85,7 @@ export const HomePage = () => {
 
           <Box>
             <Routes>
+              <Route path='refunds' element={<RefundsTab />} />
               <Route path='resale' element={<ResaleTab />} />
               <Route path='freight' element={<FreightTab />} />
               <Route path='carparts' element={<CarpartsTab />} />

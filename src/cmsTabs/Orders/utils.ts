@@ -1,4 +1,7 @@
 export const ORDER_STATE_OPTIONS = [
+  {value:'completed',label:'Завершён'},
+  {value:'refunded',label:'Возврат одобрен / refunded'},
+  {value:'disputed',label:'Спор по оплате'},
   {
     value: 'pending',
     label: 'В обработке',
