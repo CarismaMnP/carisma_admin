@@ -1,5 +1,7 @@
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Alert,
+  Link,
   Chip,
   Button,
   Dialog,
@@ -73,7 +75,7 @@ export const OrderRow: FC<IOrderRowProps> = ({ order, actionCallback }) => {
         {order.isIntegrationTest && <Chip size="small" label="Тест интеграции" color="warning" />}
       </TableCell>
       <TableCell>
-        <Typography>{order?.user?.mail}</Typography>
+        {order.userId ? <Link component={RouterLink} to={`/users?userId=${order.userId}`} aria-label={`Открыть покупателя ${order.userId}`} sx={{overflowWrap:'anywhere'}}>{order.user?.mail || order.mail || order.fullName || `Покупатель #${order.userId}`}</Link> : <Typography>{order.mail || order.fullName || '—'}</Typography>}
       </TableCell>
       <TableCell>
         <Typography>{order?.sum} $</Typography>

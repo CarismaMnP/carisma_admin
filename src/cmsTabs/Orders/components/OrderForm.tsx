@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { Link as RouterLink } from 'react-router-dom';
 import { Alert, Box, Button, Chip, Divider, InputAdornment, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { FC, useState } from 'react';
 import { IOrder } from '@/cmsTabs/Orders/types';
@@ -164,7 +165,7 @@ export const OrderForm: FC<IOrderFormProps> = ({ onFinish, order, mode }) => {
             <Typography fontSize={12} color='text.secondary'>
               User ID
             </Typography>
-            <Typography fontSize={14}>{order?.userId || '-'}</Typography>
+            {order?.userId ? <Button component={RouterLink} to={`/users?userId=${order.userId}`} size='small' sx={{justifyContent:'flex-start',px:0}}>Открыть покупателя #{order.userId}</Button> : <Typography fontSize={14}>—</Typography>}
           </Stack>
         </Box>
       </Stack>
